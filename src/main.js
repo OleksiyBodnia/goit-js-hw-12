@@ -1,0 +1,1 @@
+import File from "./js/pixabay-api.js";
