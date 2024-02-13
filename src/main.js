@@ -127,7 +127,7 @@ loadMoreBtn.addEventListener('click', async (event) => {
         const cardHeight = listOfPhotos.firstElementChild.getBoundingClientRect().height;
         
         window.scrollBy({
-            top: cardHeight * 3.45, 
+            top: cardHeight * 3, 
             behavior: 'smooth'
         });
     } catch (error){
