@@ -15,13 +15,12 @@ loadMoreBtn.textContent = "Load more"
 loadMoreBtn.style.margin = "0 auto";
 loadMoreBtn.style.marginTop = "15px";
 loadMoreBtn.style.width = "150px";
-listOfPhotos.after(loadMoreBtn);
+loader.after(loadMoreBtn);
 loadMoreBtn.style.display = 'none';
 
 let inputValue = '';
 let page = 1;
 const perPage = 15;
-const totalPages = Math.ceil(100/perPage);
 
 const searchDefaultParam = {
     key: '42291336-b4c9ef387c9d7e209159058e7',
@@ -31,8 +30,29 @@ const searchDefaultParam = {
 }
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
+const getTotalHits = async () => {
+    try{
+        const response = await axios.get('?', {
+            params: {
+                q: inputValue,
+                ...searchDefaultParam,
+                page: 1,
+                per_page: perPage,
+            }
+        });
+        return response.data.totalHits;
+    } catch (error){
+        console.log(error);
+        return 0;
+    }
+}
+
+const totalHits = await getTotalHits();
+let totalPages = Math.ceil(totalHits/perPage);
+
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    page = 1;
     listOfPhotos.innerHTML = '';
     inputValue = input.value.trim();
 
@@ -103,14 +123,6 @@ const renderingPhotos = data => {
 
 loadMoreBtn.addEventListener('click', async (event) => {
     loader.style.display = 'block';
-    if (page > totalPages) {
-        loader.style.display = 'none';
-        loadMoreBtn.style.display = 'none';
-        return iziToast.error({
-          position: "topRight",
-          message: "We're sorry, there are no more posts to load"
-        });
-      }
 
     try {
         page++;
@@ -121,7 +133,7 @@ loadMoreBtn.addEventListener('click', async (event) => {
                 page: page,
                 per_page: perPage
             }
-        })        
+        });
         loader.style.display = 'none';
         renderingPhotos(response.data.hits);
         const cardHeight = listOfPhotos.firstElementChild.getBoundingClientRect().height;
@@ -130,10 +142,23 @@ loadMoreBtn.addEventListener('click', async (event) => {
             top: cardHeight * 3, 
             behavior: 'smooth'
         });
-    } catch (error){
+
+        const newTotalHits = response.data.totalHits;
+        totalPages = Math.ceil(newTotalHits / perPage);
+
+        if (page >= totalPages) {
+            loadMoreBtn.style.display = 'none';
+            iziToast.error({
+                position: "topRight",
+                message: "We're sorry, but you've reached the end of search results."
+            });
+        }
+    } catch (error) {
         loader.style.display = 'none';
         console.log(error);
     }
-})
+});
+
+
 
 
