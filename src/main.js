@@ -47,7 +47,7 @@ const getTotalHits = async () => {
     }
 }
 
-const totalHits = await getTotalHits();
+const totalHits = getTotalHits();
 let totalPages = Math.ceil(totalHits/perPage);
 
 form.addEventListener('submit', async (event) => {
